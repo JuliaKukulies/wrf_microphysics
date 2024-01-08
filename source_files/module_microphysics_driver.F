@@ -111,6 +111,12 @@ SUBROUTINE microphysics_driver(                                          &
                       ,qnwfa2d, qnifa2d, qnbca2d                         & ! for water/ice-friendly/black carbon aerosols
                       ,qnocbb2d, qnbcbb2d                                & ! for biomass burning aerosols
                       ,refl_10cm                                         & ! HM, 9/22/09, add for refl
+                      ,prs_sde                                           & ! HM, 11/03/23, add for deposition
+                      ,prs_ide                                           & ! HM, 11/03/23, add for deposition
+                      ,pri_ide                                           & ! HM, 11/03/23, add for deposition
+                      ,prg_gde                                           & ! HM, 11/03/23, add for deposition
+                      ,pri_inu                                           & ! HM, 11/03/23, add for deposition
+                      ,pri_iha                                           & ! HM, 11/03/23, add for deposition
                       ,vmi3d                                             & ! for P3 
                       ,di3d                                              & ! for P3 
                       ,rhopo3d                                           & ! for P3 
@@ -605,6 +611,10 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
 ! Optional
 !
    REAL, OPTIONAL, DIMENSION( ims:ime , kms:kme, jms:jme ) , INTENT(OUT) :: refl_10cm
+   REAL, OPTIONAL, DIMENSION( ims:ime , kms:kme, jms:jme ) , INTENT(OUT) :: prw_vcd
+   REAL, OPTIONAL, DIMENSION( ims:ime , kms:kme, jms:jme ) , INTENT(OUT) :: prs_sde, prs_ide, pri_ide
+   REAL, OPTIONAL, DIMENSION( ims:ime , kms:kme, jms:jme ) , INTENT(OUT) :: prg_gde, pri_inu, pri_iha
+   REAL, OPTIONAL, DIMENSION( ims:ime , kms:kme, jms:jme ) , INTENT(OUT) :: qvten      
    REAL, OPTIONAL, DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(INOUT) :: &  ! for ntu3m
                    qdcn_curr,qtcn_curr,qccn_curr,qrcn_curr,qnin_curr,   &  ! for ntu3m
                    fi_curr,fs_curr,vi_curr,vs_curr,vg_curr,ai_curr,     &  ! for ntu3m
@@ -1091,6 +1101,14 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                      diagflag=diagflag,                  &
                      ke_diag = ke_diag,                  &
                      do_radar_ref=do_radar_ref,          &
+                     PRW_VCD=prw_vcd,                    &
+                     QVTEN=qvten,                        &
+                     PRS_SDE=prs_sde,                    &
+                     PRS_IDE=prs_ide,                    &
+                     PRI_IDE=pri_ide,                    &
+                     PRG_GDE=prg_gde,                    &
+                     PRI_INU=pri_inu,                    &
+                     PRI_IHA=pri_iha,                    &                        
                      re_cloud=re_cloud,                  &
                      re_ice=re_ice,                      &
                      re_snow=re_snow,                    &
@@ -1186,6 +1204,14 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                      diagflag=diagflag,                  &
                      ke_diag = ke_diag,                  &
                      do_radar_ref=do_radar_ref,          &
+                     PRW_VCD=prw_vcd,                    &
+                     QVTEN=qvten,                        &
+                     PRS_SDE=prs_sde,                    &
+                     PRS_IDE=prs_ide,                    &
+                     PRI_IDE=pri_ide,                    &
+                     PRG_GDE=prg_gde,                    &
+                     PRI_INU=pri_inu,                    &
+                     PRI_IHA=pri_iha,                    &                        
                      re_cloud=re_cloud,                  &
                      re_ice=re_ice,                      &
                      re_snow=re_snow,                    &
@@ -1259,6 +1285,14 @@ REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                        &
                      diagflag=diagflag,                  &
                      ke_diag = ke_diag,                  &
                      do_radar_ref=do_radar_ref,          &
+                     PRW_VCD=prw_vcd,                    &
+                     QVTEN=qvten,                        &
+                     PRS_SDE=prs_sde,                    &
+                     PRS_IDE=prs_ide,                    &
+                     PRI_IDE=pri_ide,                    &
+                     PRG_GDE=prg_gde,                    &
+                     PRI_INU=pri_inu,                    &
+                     PRI_IHA=pri_iha,                    &
                      re_cloud=re_cloud,                  & ! G. Thompson
                      re_ice=re_ice,                      & ! G. Thompson
                      re_snow=re_snow,                    & ! G. Thompson

@@ -3725,6 +3725,14 @@ BENCH_START(micro_driver_tim)
       &        ,RHO=grid%rho       ,SPEC_ZONE=grid%spec_zone              &
       &        ,SR=grid%sr              ,TH=th_phy                        &
       &        ,refl_10cm=grid%refl_10cm                                  & ! hm, 9/22/09 for refl
+      &        ,prw_vcd=grid%prw_vcd                                      & ! hm, 11/04/23 for condensation
+      &        ,qvten=grid%qvten                                          & ! hm, 11/04/23 for water vapor tendency
+      &        ,prs_sde=grid%prs_sde                                      & ! hm, 11/04/23 for dep
+      &        ,prs_ide=grid%prs_ide                                      & ! hm, 11/04/23 for dep
+      &        ,pri_ide=grid%pri_ide                                      & ! hm, 11/04/23 for dep
+      &        ,prg_gde=grid%prg_gde                                      & ! hm, 11/04/23 for dep
+      &        ,pri_inu=grid%pri_inu                                      & ! hm, 11/04/23 for dep
+      &        ,pri_iha=grid%pri_iha                                      & ! hm, 11/04/23 for dep      
       &        ,vmi3d=grid%vmi3d                                          & ! for P3
       &        ,di3d=grid%di3d                                            & ! for P3
       &        ,rhopo3d=grid%rhopo3d                                      & ! for P3

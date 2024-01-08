@@ -1574,6 +1574,14 @@ state    real  SNOWNCV          ij      misc        1         -      r        "S
 state    real  GRAUPELNCV       ij      misc        1         -      r        "GRAUPELNCV"            "TIME-STEP NONCONVECTIVE GRAUPEL"                         "mm"
 state    real  HAILNCV          ij      misc        1         -      r        "HAILNCV"               "TIME-STEP NONCONVECTIVE HAIL"                            "mm"
 state    real  refl_10cm       ikj      dyn_em      1         -      hdu      "refl_10cm"             "Radar reflectivity (lamda = 10 cm)"  "dBZ"
+state    real    prw_vcd      ikj     dyn_em      1         -       i01rhdu       "prw_vcd"             "Condensation rate"  "kg m-2 s-1"
+state    real    prs_sde      ikj     dyn_em      1         -       i01rhdu       "prs_sde"             "Deposition rate"  "kg m-2 s-1"
+state    real    prs_ide      ikj     dyn_em      1         -       i01rhdu       "prs_ide"             "Deposition rate"  "kg m-2 s-1"
+state    real    pri_ide      ikj     dyn_em      1         -       i01rhdu       "pri_ide"             "Deposition rate"  "kg m-2 s-1"
+state    real    prg_gde      ikj     dyn_em      1         -       i01rhdu       "prg_gde"             "Deposition rate"  "kg m-2 s-1"
+state    real    pri_inu      ikj     dyn_em      1         -       i01rhdu       "pri_inu"             "Deposition rate"  "kg m-2 s-1"
+state    real    pri_iha      ikj     dyn_em      1         -       i01rhdu       "pri_iha"             "Deposition rate"  "kg m-2 s-1"
+state    real    qvten      ikj     dyn_em      1         -      i01rhdu       "qvten"             "Water vapor tendency"  "kg m-2 s-1"
 state    real  mskf_refl_10cm  ikj      dyn_em      1         -      hdu      "mskf_refl_10cm"        "Full Radar reflectivity (lamda = 10 cm)"  "dBZ"
 state    real    th_old          ikj      misc        1         -      rusd        "TH_OLD"              "Old Value of Th"   "K"
 state    real    qv_old          ikj      misc        1         -      rusd        "QV_OLD"              "Old Value of qv"   "kg kg-1"
@@ -2986,7 +2994,7 @@ package   fer_mp_hires_advect  mp_physics==15          -             moist:qv,qc
 package   wsm6scheme      mp_physics==6                -             moist:qv,qc,qr,qi,qs,qg;state:re_cloud,re_ice,re_snow
 package   wsm6rscheme     mp_physics==106              -             moist:qv,qc,qr,qi,qs,qg
 package   nuwrf4icescheme mp_physics==7              -               moist:qv,qc,qr,qi,qs,qg,qh;state:phys_tot,physc,physe,physd,physs,physm,physf,acphys_tot,acphysc,acphyse,acphysd,acphyss,acphysm,acphysf,preci3d,precs3d,precg3d,precr3d,prech3d,re_cloud_gsfc,re_rain_gsfc,re_ice_gsfc,re_snow_gsfc,re_graupel_gsfc,re_hail_gsfc,re_cloud,re_ice,re_snow
-package   thompson        mp_physics==8                -             moist:qv,qc,qr,qi,qs,qg;scalar:qni,qnr;state:re_cloud,re_ice,re_snow
+package   thompson        mp_physics==8                -             moist:qv,qc,qr,qi,qs,qg;scalar:qni,qnr;state:re_cloud,re_ice,re_snow,prw_vcd,qvten,prs_sde,prs_ide,pri_ide,prg_gde,pri_inu,pri_iha
 package   milbrandt2mom   mp_physics==9                -             moist:qv,qc,qr,qi,qs,qg,qh;scalar:qnc,qnr,qni,qns,qng,qnh
 package   morr_two_moment mp_physics==10               -             moist:qv,qc,qr,qi,qs,qg;scalar:qni,qns,qnr,qng;state:rqrcuten,rqscuten,rqicuten
 package   cammgmpscheme   mp_physics==11               -             moist:qv,qc,qi,qr,qs;scalar:qnc,qni,qnr,qns;state:rh_old_mp,lcd_old_mp,cldfra_old_mp,cldfra_mp,cldfra_mp_all,cldfra_conv,cldfrai,cldfral,turbtype3d,smaw3d,wsedl3d,icwmrdp3d,dp3d,shfrc3d,dlf,dlf2,tke_pbl,lradius,iradius
