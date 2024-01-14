@@ -111,12 +111,14 @@ SUBROUTINE microphysics_driver(                                          &
                       ,qnwfa2d, qnifa2d, qnbca2d                         & ! for water/ice-friendly/black carbon aerosols
                       ,qnocbb2d, qnbcbb2d                                & ! for biomass burning aerosols
                       ,refl_10cm                                         & ! HM, 9/22/09, add for refl
-                      ,prs_sde                                           & ! HM, 11/03/23, add for deposition
-                      ,prs_ide                                           & ! HM, 11/03/23, add for deposition
-                      ,pri_ide                                           & ! HM, 11/03/23, add for deposition
-                      ,prg_gde                                           & ! HM, 11/03/23, add for deposition
-                      ,pri_inu                                           & ! HM, 11/03/23, add for deposition
-                      ,pri_iha                                           & ! HM, 11/03/23, add for deposition
+                      ,prw_vcd                                           & ! HM, 11/03/23, add for condensation               
+                      ,prs_sde                                           & ! HM, 11/03/23, add for deposition                 
+                      ,prs_ide                                           & ! HM, 11/03/23, add for deposition                 
+                      ,pri_ide                                           & ! HM, 11/03/23, add for deposition                 
+                      ,prg_gde                                           & ! HM, 11/03/23, add for deposition                 
+                      ,pri_inu                                           & ! HM, 11/03/23, add for deposition                 
+                      ,pri_iha                                           & ! HM, 11/03/23, add for deposition                 
+                      ,qvten                                             & ! HM, 11/03/23, add for qv tendency    
                       ,vmi3d                                             & ! for P3 
                       ,di3d                                              & ! for P3 
                       ,rhopo3d                                           & ! for P3 
