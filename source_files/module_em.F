@@ -214,7 +214,7 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                          ids, ide, jds, jde, kds, kde,                    &
                          ims, ime, jms, jme, kms, kme,                    &
                          its, ite, jts, jte, kts, kte,                    &
-                         max_vert_cfl, max_horiz_cfl)
+                         max_vert_cfl, max_horiz_cfl, dz8w, xtime)
 
    IMPLICIT NONE
 
@@ -346,7 +346,19 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
    REAL , DIMENSION( ims:ime , jms:jme )         :: muu_old, muu_new                                                              
    REAL , DIMENSION( ims:ime , jms:jme )         :: muv_old, muv_new                                                              
    LOGICAL                                       :: ieva
-   
+
+
+!.. Additions for forced vertical velocity nudging term used for squall3d test case.
+!.. Logic follows w_damp, term applied to rw_tend, note that this is coupled with mut.
+!..  H. Morrison similar to mods by G. Bryan, 20Aug2012
+   REAL, INTENT(IN) :: xtime
+   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(IN) :: dz8w
+   real    :: xxc,xxr,zzc,zzr,xxx,alpha,beta,gamma,uc,ushear,yyc,yyr,yyy,DELTAx
+   real, dimension(ims:ime, kms:kme, jms:jme) :: zzz
+!.. End additions
+
+
+      
 !<DESCRIPTION>
 !
 !  rk_tendency computes the large-timestep tendency terms in the
@@ -744,6 +756,80 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                     ims, ime, jms, jme, kms, kme,     &
                     its, ite, jts, jte, kts, kte     )
 
+
+!..............................................................................
+! hm add 12/14/12 -- add u-forcing following George Bryan to initiate convection
+! use logic of adding perturbation to ru_tend
+! afp Apr. 2018 modified the code to automatically adjust the grid spacing, 
+! shifted the perturbation closer to the east end of the domain and made it
+! finite in the y-direction
+
+! for improve, skip code
+!     goto 223
+
+     alpha=0.2  ! m/s^2 - orig was 0.1
+
+! xtime*60. = time in sec
+
+     if (xtime*60. .lt. 3300.) then
+        gamma=1.
+     else if (xtime*60.0.ge.3300. .and. xtime*60.0.lt.3600.) then
+        gamma=1.-(xtime*60.0-3300.)/300.
+     else if (xtime*60.0.ge.3600.) then
+        gamma=0.
+     end if
+
+     ushear=12.
+     uc=17.
+
+     ! don't move forcing with mean u wind!
+     DELTAx=config_flags%dx
+     xxc= 0.16*(ide-ids+1)*DELTAx !+ (ushear-uc)*xtime*60.0
+     if (xtime*60.0 .le. 3600) print*, ' DEBUG2-GT, xtime, gamma, xxc ', xtime*60, gamma, xxc
+     xxr=20000. ! orig was 10000
+     zzc=0.
+     zzr=10000.
+     yyc= 0.5*(jde-jds+1)*DELTAx
+     yyr=40000. ! orig was 25000
+
+     if (gamma .gt. 1.E-9) then
+
+         DO k = kts,kte
+             DO i = its,ite
+                xxx=real(i)*DELTAx        !  Hard-wired 1km spacing here and above in eqn in xxc
+        
+                DO j = jts,jte
+                   yyy=real(j)*DELTAx
+                   ! print*,j,jts,jte,jds,jde
+                   ! if (j.le.10. .or. j.gt.jde-10.) then
+                   !    gamma=0.
+                   ! end if
+                   if (k.eq.1) then
+                      zzz(i,k,j)=0.
+                   else if (k.ge.2) then
+                      zzz(i,k,j)=zzz(i,k-1,j)+dz8w(i,k,j)
+                   end if
+        
+                   if ((abs(xxx-xxc).le.xxr) .and. (abs(yyy-yyc).le.yyr) .and. (abs(zzz(i,k,j)-zzc).le.zzr)) then
+                      beta=alpha*gamma* &
+                           cos(3.1415927/2.*(xxx-xxc)/xxr)/ &
+                           ((cosh(2.5*(zzz(i,k,j)-zzc)/zzr))**2)
+        
+        ! apply forcing
+                      ru_tend(i,k,j) = ru_tend(i,k,j)+beta*muu(i,j)
+        !             if (k.eq.0) then
+        !                print*,i,j,beta
+        !             end if
+                   end if
+        
+                end do
+             end do
+         end do
+     endif
+
+ 223       continue
+
+! hm 12/14/12 end u-forcing
    IF(config_flags%pert_coriolis) THEN
 
         CALL perturbation_coriolis ( ru, rv, rw,                   &

@@ -133,8 +133,8 @@ CONTAINS
    REAL :: mtn_ht
    REAL :: randx       ! for LES
    INTEGER :: ks, ke, id
-
-   LOGICAL, EXTERNAL :: wrf_dm_on_monitor
+      LOGICAL, EXTERNAL :: wrf_dm_on_monitor
+      REAL :: dum
 
    SELECT CASE ( model_data_order )
          CASE ( DATA_ORDER_ZXY )
@@ -210,7 +210,7 @@ CONTAINS
    z_scale = 8000./config_flags%ztop
    pi = 2.*asin(1.0)
    write(6,*) ' pi is ',pi
-   nxc = (ide-ids)/2
+   nxc = (ide-ids)/6.25
    nyc = (jde-jds)/2
 
   CASE (grav2d_x)
@@ -1089,48 +1089,96 @@ CONTAINS
   CASE (quarter_ss)
 !  QSS thermal perturbation to kick off convection
 
-  write(6,*) ' nxc, nyc for perturbation ',nxc,nyc
-  write(6,*) ' delt for perturbation ',delt
+!  write(6,*) ' nxc, nyc for perturbation ',nxc,nyc
+!  write(6,*) ' delt for perturbation ',delt
+!
+!  DO J = jts, min(jde-1,jte)
+!    yrad = config_flags%dy*float(j-nyc)/10000.
+!!   yrad = 0.
+!    DO I = its, min(ide-1,ite)
+!      xrad = config_flags%dx*float(i-nxc)/10000.
+!!     xrad = 0.
+!      DO K = 1, kte-1
+!
+!!  put in preturbation theta (bubble) and recalc density.  note,
+!!  the mass in the column is not changing, so when theta changes,
+!!  we recompute density and geopotential
+!
+!        zrad = 0.5*(grid%ph_1(i,k,j)+grid%ph_1(i,k+1,j)  &
+!                   +grid%phb(i,k,j)+grid%phb(i,k+1,j))/g
+!        zrad = (zrad-1500.)/1500.
+!        RAD=SQRT(xrad*xrad+yrad*yrad+zrad*zrad)
+!        IF(RAD <= 1.) THEN
+!           grid%t_1(i,k,j)=grid%t_1(i,k,j)+delt*COS(.5*PI*RAD)**2
+!           grid%t_2(i,k,j)=grid%t_1(i,k,j)
+!           qvf = 1. + rvovrd*moist(i,k,j,P_QV)
+!           grid%alt(i,k,j) = (r_d/p1000mb)*(grid%t_1(i,k,j)+t0)*qvf* &
+!                        (((grid%p(i,k,j)+grid%pb(i,k,j))/p1000mb)**cvpm)
+!           grid%al(i,k,j) = grid%alt(i,k,j) - grid%alb(i,k,j)
+!        ENDIF
+!      ENDDO
+!
+!!  rebalance hydrostatically
+!
+!      DO k = 2,kte
+!        grid%ph_1(i,k,j) = grid%ph_1(i,k-1,j) - (grid%dnw(k-1))*(       &
+!                     ((grid%c1h(k-1)*grid%mub(i,j)+grid%c2h(k-1))+(grid%c1h(k-1)*grid%mu_1(i,j)))*grid%al(i,k-1,j)+ &
+!                      (grid%c1h(k-1)*grid%mu_1(i,j))*grid%alb(i,k-1,j)  )
+!
+!        grid%ph_2(i,k,j) = grid%ph_1(i,k,j)
+!        grid%ph0(i,k,j) = grid%ph_1(i,k,j) + grid%phb(i,k,j)
+!      ENDDO
+!
+!      ENDDO
+!      ENDDO
+!
+      
+!+---+-----------------------------------------------------------------+
+! hm add perturbation in cold pool only
+! afp Apr. 2018 generalized the code for any grid spacing and shifted the
+! perturbation location
+
+!.. Make call that generates the seed that will be used to produce the
+!.. random variations in the initial temperature field of about +/-2K.
+!.. Only applying the perturbation in a strip about where the convect
+!.. initiation is planned (40 gridpoints wide and below 4km).
+
+  CALL random_seed
 
   DO J = jts, min(jde-1,jte)
-    yrad = config_flags%dy*float(j-nyc)/10000.
-!   yrad = 0.
+    IF (j.gt.nyc-55000/config_flags%dx .and. j.lt.nyc+55000/config_flags%dx) THEN
     DO I = its, min(ide-1,ite)
-      xrad = config_flags%dx*float(i-nxc)/10000.
-!     xrad = 0.
-      DO K = 1, kte-1
-
-!  put in preturbation theta (bubble) and recalc density.  note,
-!  the mass in the column is not changing, so when theta changes,
-!  we recompute density and geopotential
-
-        zrad = 0.5*(grid%ph_1(i,k,j)+grid%ph_1(i,k+1,j)  &
-                   +grid%phb(i,k,j)+grid%phb(i,k+1,j))/g
-        zrad = (zrad-1500.)/1500.
-        RAD=SQRT(xrad*xrad+yrad*yrad+zrad*zrad)
-        IF(RAD <= 1.) THEN
-           grid%t_1(i,k,j)=grid%t_1(i,k,j)+delt*COS(.5*PI*RAD)**2
-           grid%t_2(i,k,j)=grid%t_1(i,k,j)
-           qvf = 1. + rvovrd*moist(i,k,j,P_QV)
-           grid%alt(i,k,j) = (r_d/p1000mb)*(grid%t_1(i,k,j)+t0)*qvf* &
-                        (((grid%p(i,k,j)+grid%pb(i,k,j))/p1000mb)**cvpm)
-           grid%al(i,k,j) = grid%alt(i,k,j) - grid%alb(i,k,j)
-        ENDIF
-      ENDDO
+      IF (i.gt.nxc-40000/config_flags%dx .and. i.lt.nxc+40000/config_flags%dx) THEN
+      DO k = 1,17
+          CALL RANDOM_NUMBER(dum)
+!         write(6,*)'ran',dum
+          grid%t_1(i,k,j)=grid%t_1(i,k,j)-dum*0.1+0.05
+          grid%t_2(i,k,j)=grid%t_1(i,k,j)
+          qvf = 1. + rvovrd*moist(i,k,j,P_QV)
+          grid%alt(i,k,j) = (r_d/p1000mb)*(grid%t_1(i,k,j)+t0)*qvf* &
+               (((grid%p(i,k,j)+grid%pb(i,k,j))/p1000mb)**cvpm)
+          grid%al(i,k,j) = grid%alt(i,k,j) - grid%alb(i,k,j)
+      END DO
 
 !  rebalance hydrostatically
-
-      DO k = 2,kte
-        grid%ph_1(i,k,j) = grid%ph_1(i,k-1,j) - (grid%dnw(k-1))*(       &
-                     ((grid%c1h(k-1)*grid%mub(i,j)+grid%c2h(k-1))+(grid%c1h(k-1)*grid%mu_1(i,j)))*grid%al(i,k-1,j)+ &
-                      (grid%c1h(k-1)*grid%mu_1(i,j))*grid%alb(i,k-1,j)  )
+      DO k  = 2,kte
+        grid%ph_1(i,k,j) = grid%ph_1(i,k-1,j) - (1./grid%rdnw(k-1))*(       &
+                     (grid%mub(i,j)+grid%mu_1(i,j))*grid%al(i,k-1,j)+ &
+                      grid%mu_1(i,j)*grid%alb(i,k-1,j)  )
 
         grid%ph_2(i,k,j) = grid%ph_1(i,k,j)
         grid%ph0(i,k,j) = grid%ph_1(i,k,j) + grid%phb(i,k,j)
       ENDDO
 
+      END IF
+
     ENDDO
+    END IF
   ENDDO
+
+!+---+-----------------------------------------------------------------+
+
+      
   CASE (squall2d_x)
 !  QSS thermal perturbation to kick off convection
 
@@ -1175,7 +1223,11 @@ CONTAINS
       ENDDO
 
     ENDDO
-  ENDDO
+      ENDDO
+
+
+
+      
   CASE (squall2d_y)
 !  QSS thermal perturbation to kick off convection
 
